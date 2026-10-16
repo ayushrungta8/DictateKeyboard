@@ -17,6 +17,7 @@ import dev.patrickgold.florisboard.appContext
 import dev.patrickgold.florisboard.clipboardManager
 import dev.patrickgold.florisboard.dictate.DictateController
 import dev.patrickgold.florisboard.dictate.DictateLanguages
+import dev.patrickgold.florisboard.ime.input.InputShiftState
 import dev.patrickgold.florisboard.ime.ImeUiMode
 import dev.patrickgold.florisboard.keyboardManager
 import dev.patrickgold.florisboard.ime.clipboard.provider.ClipboardItem
@@ -140,11 +141,25 @@ class PersonalKeyboardUiTest {
                 await("Number row did not insert a digit") { field.text.toString() == "1" }
                 instrument.runOnMainSync { field.setText("") }
                 SystemClock.sleep(350)
+                await("Unshifted keys should be lowercase") { find("q") != null && find("Q") == null }
+                tap("q")
+                await("Lowercase key did not insert lowercase") { field.text.toString() == "q" }
+                instrument.runOnMainSync { keyboard.activeState.inputShiftState = InputShiftState.SHIFTED_MANUAL }
+                await("Shift did not capitalize key faces") { find("Q") != null }
+                capture("shifted")
                 tap("Q")
-                await("Uppercase key face changed lowercase typing") { field.text.toString() == "q" }
+                await("Shift did not insert uppercase and reset") { field.text.toString() == "qQ" && find("q") != null }
+                instrument.runOnMainSync { keyboard.activeState.inputShiftState = InputShiftState.CAPS_LOCK }
+                await("Caps Lock did not capitalize key faces") { find("Q") != null }
+                tap("Q")
+                tap("Q")
+                await("Caps Lock did not persist") { field.text.toString() == "qQQQ" && find("Q") != null }
+                capture("caps-lock")
+                instrument.runOnMainSync { keyboard.activeState.inputShiftState = InputShiftState.UNSHIFTED }
+                await("Disabling Caps Lock did not restore lowercase") { find("q") != null && find("Q") == null }
                 instrument.runOnMainSync { field.setText("") }
                 SystemClock.sleep(350)
-                tap("Q", holdMs = 650)
+                tap("q", holdMs = 650)
                 await("Q long-press did not insert its displayed percent symbol") { field.text.toString() == "%" }
                 instrument.runOnMainSync { field.setText("") }
                 SystemClock.sleep(350)

@@ -170,8 +170,7 @@ fun ComputingEvaluator.computeLabel(data: KeyData): String? {
     return if (data.type == KeyType.CHARACTER && data.code != KeyCode.SPACE && data.code != KeyCode.CJK_SPACE
         && data.code != KeyCode.HALF_SPACE && data.code != KeyCode.KESHIDA || data.type == KeyType.NUMERIC
     ) {
-        val label = data.asString(isForDisplay = true)
-        if (evaluator.keyboard.mode == KeyboardMode.CHARACTERS && data.code in 97..122) label.uppercase() else label
+        data.asString(isForDisplay = true)
     } else {
         when (data.code) {
             KeyCode.PHONE_PAUSE -> evaluator.context()?.getString(R.string.key__phone_pause)
