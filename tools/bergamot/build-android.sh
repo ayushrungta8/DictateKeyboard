@@ -15,6 +15,7 @@ set -euo pipefail
 # maintained bergamot-translator and Marian fork; the standalone bergamot-translator repo is archived.
 TRANSLATIONS_COMMIT="a6310e24669df32a9098faadccbb1206448b51cb"
 MIN_SDK=26
+BUILD_CPUS="$(getconf _NPROCESSORS_ONLN)"
 if [ "$#" -gt 0 ]; then ABIS=("$@"); else ABIS=("arm64-v8a"); fi
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +29,9 @@ CMAKE_VERSION="$(grep '^cmake ' "$REPO_ROOT/gradle/tools.versions.toml" | sed -E
 NDK="$SDK/ndk/$NDK_VERSION"
 CMAKE="$SDK/cmake/$CMAKE_VERSION/bin/cmake"
 NINJA="$SDK/cmake/$CMAKE_VERSION/bin/ninja"
-STRIP="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
+NDK_HOST="linux-x86_64"
+if [ "$(uname -s)" = "Darwin" ]; then NDK_HOST="darwin-x86_64"; fi
+STRIP="$NDK/toolchains/llvm/prebuilt/$NDK_HOST/bin/llvm-strip"
 for tool in "$CMAKE" "$NINJA" "$STRIP"; do
   [ -x "$tool" ] || { echo "Missing $tool — install NDK $NDK_VERSION and CMake $CMAKE_VERSION via the SDK manager." >&2; exit 1; }
 done
@@ -102,7 +105,7 @@ for ABI in "${ABIS[@]}"; do
     -DSPM_ENABLE_TCMALLOC=OFF \
     -DUSE_TCMALLOC=OFF \
     -DCMAKE_CXX_FLAGS="-Wno-enum-constexpr-conversion"
-  "$NINJA" -C "$OUT" -j "$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))" dictate_bergamot
+  "$NINJA" -C "$OUT" -j "$(( ${BUILD_CPUS} / 2 > 0 ? ${BUILD_CPUS} / 2 : 1 ))" dictate_bergamot
 
   DEST="$REPO_ROOT/app/src/main/jniLibs/$ABI"
   mkdir -p "$DEST"

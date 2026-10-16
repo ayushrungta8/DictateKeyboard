@@ -30,17 +30,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.patrickgold.florisboard.app.FlorisPreferenceStore
-import dev.patrickgold.florisboard.dictate.DictatePromptsLayout
+import dev.patrickgold.florisboard.dictate.DictateController
+import dev.patrickgold.florisboard.nlpManager
+import dev.patrickgold.florisboard.ime.smartbar.PersonalToolbarHeight
 import dev.patrickgold.florisboard.ime.media.emoji.emojiRowVisible
 import dev.patrickgold.florisboard.ime.nlp.NlpInlineAutofill
-import dev.patrickgold.florisboard.ime.smartbar.ExtendedActionsPlacement
 import dev.patrickgold.florisboard.ime.smartbar.InlineSuggestionsChipMargin
-import dev.patrickgold.florisboard.ime.smartbar.SmartbarLayout
 import dev.patrickgold.florisboard.ime.text.keyboard.TextKeyboard
 import dev.patrickgold.florisboard.ime.window.LocalWindowController
 import dev.patrickgold.florisboard.keyboardManager
-import dev.patrickgold.jetpref.datastore.model.collectAsState
 
 private val LocalKeyboardRowBaseHeight = compositionLocalOf { 65.dp }
 private val LocalSmartbarHeight = compositionLocalOf { 40.dp }
@@ -101,31 +99,13 @@ object FlorisImeSizing {
 
     @Composable
     fun smartbarRowCountAsState(): State<Int> {
-        val prefs by FlorisPreferenceStore
-        val smartbarEnabled by prefs.smartbar.enabled.collectAsState()
-        val smartbarLayout by prefs.smartbar.layout.collectAsState()
-        val extendedActionsExpanded by prefs.smartbar.extendedActionsExpanded.collectAsState()
-        val extendedActionsPlacement by prefs.smartbar.extendedActionsPlacement.collectAsState()
-        return remember {
-            derivedStateOf {
-                if (smartbarEnabled) {
-                    if (smartbarLayout == SmartbarLayout.SUGGESTIONS_ACTIONS_EXTENDED && extendedActionsExpanded &&
-                        extendedActionsPlacement != ExtendedActionsPlacement.OVERLAY_APP_UI) {
-                        2
-                    } else {
-                        1
-                    }
-                } else {
-                    0
-                }
-            }
-        }
+        return remember { derivedStateOf { 1 } }
     }
 
     @Composable
     fun smartbarUiHeight(): Dp {
         val smartbarRowCount by smartbarRowCountAsState()
-        return smartbarHeight * smartbarRowCount
+        return smartbarHeight * smartbarRowCount + PersonalToolbarHeight
     }
 
     @Composable
@@ -138,30 +118,13 @@ object FlorisImeSizing {
      * clipboard, history). [keyboardUiHeight] derives its row count from the currently active evaluator,
      * which for a panel can differ from the typing keyboard and make the panel a different height — so it
      * visibly jumps when opened. Basing it on the last characters keyboard (like [rowCountAsState]) keeps a
-     * panel exactly as tall as the keyboard it replaces, including the always-on rewording prompt row when
-     * that's enabled (the panels replace it too, so its height must be counted).
+     * panel exactly as tall as the keyboard it replaces, including the permanent toolbar.
      */
     @Composable
     fun panelUiHeight(): Dp {
-        val prefs by FlorisPreferenceStore
         val rowCount by rowCountAsState()
-        val smartbarEnabled by prefs.smartbar.enabled.collectAsState()
-        val rewordingEnabled by prefs.dictate.rewordingEnabled.collectAsState()
-        val promptsLayout by prefs.dictate.promptsLayout.collectAsState()
-        // The rewording prompt row (ROW layout) is pinned above the Smartbar on the normal keyboard and
-        // adds its height (DictatePromptRow uses smartbarHeight * 1.25); include it so the panels match.
-        val promptRowHeight =
-            if (smartbarEnabled && rewordingEnabled && promptsLayout == DictatePromptsLayout.ROW) {
-                smartbarHeight * 1.25f
-            } else {
-                0.dp
-            }
-        // Same reasoning for the recent-emoji row (#340), which sits below the Smartbar and is one
-        // [smartbarHeight] tall. Asked through the very predicate the row itself uses, so the two can
-        // never disagree — a panel one row off is a keyboard that jumps when it opens.
         val emojiRowHeight = if (emojiRowVisible()) smartbarHeight else 0.dp
-        return keyboardRowBaseHeight * rowCount.coerceAtLeast(4) + smartbarUiHeight() +
-            promptRowHeight + emojiRowHeight
+        return keyboardRowBaseHeight * rowCount.coerceAtLeast(4) + smartbarUiHeight() + emojiRowHeight
     }
 }
 

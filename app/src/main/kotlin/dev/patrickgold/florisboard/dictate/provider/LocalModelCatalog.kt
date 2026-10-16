@@ -192,7 +192,19 @@ data class LocalModelSpec(
  */
 object LocalModelCatalog {
 
+    /** Keep ordinary English on its existing model; Hinglish is an explicit Roman-script mode. */
+    fun personalModelForLanguage(language: String, preferred: String): String {
+        val isHinglishModel = preferred == HINGLISH_APEX.id || preferred == HINGLISH_SWIFT.id
+        return when {
+            language == "hi-Latn" -> if (isHinglishModel) preferred else HINGLISH_APEX.id
+            language == "en" && isHinglishModel -> WHISPER_SMALL.id
+            else -> preferred
+        }
+    }
+
     /** Project-hosted mirror of the model files (GitHub release assets). Single re-point for hosting. */
+    private const val HINGLISH_APEX_REL = "https://github.com/ayushrungta8/DictateKeyboard/releases/download/hinglish-apex-v1"
+    private const val HINGLISH_REL = "https://github.com/ayushrungta8/DictateKeyboard/releases/download/hinglish-swift-v1"
     private const val REL = "https://github.com/DevEmperor/DictateKeyboard/releases/download/whisper-models-v1"
 
     /**
@@ -252,6 +264,36 @@ object LocalModelCatalog {
     private val VAD_FILE = LocalModelFile(
         "$REL/silero_vad.onnx", LocalTranscriptionProvider.VAD, 643_854,
         "9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6",
+    )
+
+    /** Higher-capacity Roman Hinglish model, fine-tuned from Whisper large-v3-turbo. */
+    val HINGLISH_APEX = LocalModelSpec(
+        id = "hinglish-apex",
+        displayName = "Hinglish — Apex (larger)",
+        languages = listOf("hi", "en"),
+        punctuates = true,
+        credit = ModelCredit("Oriserve", "Apache-2.0", "https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Apex"),
+        files = listOf(
+            LocalModelFile("$HINGLISH_APEX_REL/encoder.onnx", LocalTranscriptionProvider.ENCODER, 674_622_347, "76a7d6ad101aaa17a50084859af7e50bf7483839479fd2fce5313af8d2465d5c"),
+            LocalModelFile("$HINGLISH_APEX_REL/decoder.onnx", LocalTranscriptionProvider.DECODER, 361_070_805, "eaa21e747a50732597d3ca66c3116aa10ea805c03c6243bc14ed366425b33aab"),
+            LocalModelFile("$HINGLISH_APEX_REL/tokens.txt", LocalTranscriptionProvider.TOKENS, 816_730, "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"),
+            VAD_FILE,
+        ),
+    )
+
+    /** Roman-script Hindi/English, fine-tuned from Whisper Base by Oriserve. */
+    val HINGLISH_SWIFT = LocalModelSpec(
+        id = "hinglish-swift",
+        displayName = "Hinglish — Swift (faster)",
+        languages = listOf("hi", "en"),
+        punctuates = true,
+        credit = ModelCredit("Oriserve", "Apache-2.0", "https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Swift"),
+        files = listOf(
+            LocalModelFile("$HINGLISH_REL/encoder.onnx", LocalTranscriptionProvider.ENCODER, 29_104_806, "019ab168890ab44bcbaeca81f039af277e659bac17dc0766de331cf8480abc36"),
+            LocalModelFile("$HINGLISH_REL/decoder.onnx", LocalTranscriptionProvider.DECODER, 130_659_024, "eafaf60e4f891506ce65ae589e437c473e36d248de5ecb86f97e817e5f086a08"),
+            LocalModelFile("$HINGLISH_REL/tokens.txt", LocalTranscriptionProvider.TOKENS, 816_730, "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"),
+            VAD_FILE,
+        ),
     )
 
     /** ~99 MB. Fastest, lowest accuracy — good for low-end devices / quick notes. */
@@ -889,6 +931,7 @@ object LocalModelCatalog {
         GIGAAM_V3_RU,
         GIGAAM_V2_RU,
         PARAKEET_PRIMELINE_DE,
+        HINGLISH_APEX, HINGLISH_SWIFT,
         WHISPER_TINY, WHISPER_BASE, WHISPER_SMALL,
         WHISPER_TINY_EN, WHISPER_BASE_EN, WHISPER_SMALL_EN,
         KROKO_EN, KROKO_DE, KROKO_ES, KROKO_FR,

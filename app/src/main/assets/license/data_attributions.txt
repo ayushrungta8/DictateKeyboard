@@ -180,3 +180,13 @@ from English only, so a pair of two other languages is translated through Englis
   - ruy, © Google, Apache License 2.0; cpuinfo, BSD 2-Clause; simd_utils, BSD 2-Clause;
     PCRE2, BSD 3-Clause; yaml-cpp and pathie-cpp, MIT / BSD 2-Clause; ssplit-cpp, Apache License 2.0.
 
+
+Oriserve — Whisper-Hindi2Hinglish-Swift
+Apache-2.0
+https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Swift
+Locally exported and int8 quantized using the sherpa-onnx Whisper exporter.
+
+Oriserve — Whisper-Hindi2Hinglish-Apex
+Apache-2.0
+https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Apex
+Locally exported and int8 quantized using the sherpa-onnx Whisper exporter.

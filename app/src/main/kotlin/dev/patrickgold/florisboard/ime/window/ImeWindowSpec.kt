@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.width
+import dev.patrickgold.florisboard.ime.smartbar.PersonalToolbarHeight
 import kotlin.math.abs
 
 /**
@@ -111,10 +112,7 @@ sealed class ImeWindowSpec {
      * Calculates the Smartbar row height for given baseline [keyboardHeight].
      */
     fun calcSmartbarRowHeight(keyboardHeight: Dp): Dp {
-        val defRowHeight = calcRowHeight(constraints.defKeyboardHeight)
-        val rowHeight = calcRowHeight(keyboardHeight)
-        return defRowHeight * constraints.smartbarStaticScalingFactor +
-            rowHeight * constraints.smartbarDynamicScalingFactor
+        return 44.dp
     }
 
     // No upper bound on the rows (issue #418): it used to be 6, and the Hindi varnamala with a number row has
@@ -124,15 +122,15 @@ sealed class ImeWindowSpec {
         require(smartbarRowCount in 0..2)
         val effKeyboardHeight = calcRowHeight(keyboardHeight) * rowCount
         val effSmartbarHeight = calcSmartbarRowHeight(keyboardHeight) * smartbarRowCount
-        return effKeyboardHeight + effSmartbarHeight
+        return effKeyboardHeight + effSmartbarHeight + PersonalToolbarHeight
     }
 
     protected fun Dp.toBaseline(rowCount: Int, smartbarRowCount: Int): Dp  = let { effKeyboardHeight ->
         require(rowCount >= 4)
         require(smartbarRowCount in 0..2)
-        val staticSmartbarHeight = calcRowHeight(constraints.defKeyboardHeight * constraints.smartbarStaticScalingFactor * smartbarRowCount)
-        val keyboardHeight = ((effKeyboardHeight - staticSmartbarHeight) * constraints.baselineRowCount) /
-            (rowCount + constraints.smartbarDynamicScalingFactor * smartbarRowCount)
+        val staticSmartbarHeight = 44.dp * smartbarRowCount
+        val keyboardHeight = ((effKeyboardHeight - staticSmartbarHeight - PersonalToolbarHeight) * constraints.baselineRowCount) /
+            rowCount
         return keyboardHeight
     }
 

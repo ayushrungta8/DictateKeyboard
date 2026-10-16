@@ -1963,6 +1963,7 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
     }
 
     override fun onInputKeyDown(data: KeyData) {
+        clipboardManager.cancelTypeOut()
         val windowController = FlorisImeService.windowControllerOrNull()
         windowController?.editor?.disableIfNoGestureInProgress()
         when (data.code) {

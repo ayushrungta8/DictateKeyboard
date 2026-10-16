@@ -21,7 +21,7 @@ import java.util.Locale
 data class DictateLanguage(val code: String, val englishName: String) {
     /** Short uppercase badge for the smartbar chip, e.g. `DE`, `EN`, `ZH`, `YUE`. */
     val shortCode: String
-        get() = code.substringBefore('-').uppercase(Locale.ROOT)
+        get() = if (code == DictateLanguages.HINGLISH) "HING" else code.substringBefore('-').uppercase(Locale.ROOT)
 
     /**
      * Human-readable name, localized to [locale] (the device language unless a caller asks for another)
@@ -29,7 +29,7 @@ data class DictateLanguage(val code: String, val englishName: String) {
      * special-cased by callers (globe icon), so this returns its English label.
      */
     fun displayName(locale: Locale = Locale.getDefault()): String {
-        if (code == DictateLanguages.DETECT) return englishName
+        if (code == DictateLanguages.DETECT || code == DictateLanguages.HINGLISH) return englishName
         val localized = Locale.forLanguageTag(code).getDisplayName(locale)
         // A code Android has no name for comes back as the code itself, which would put "Jw" or "Haw" in
         // the picker. Anything that short is the tag, not a language.
@@ -45,6 +45,7 @@ data class DictateLanguage(val code: String, val englishName: String) {
  */
 object DictateLanguages {
     const val DETECT = "detect"
+    const val HINGLISH = "hi-Latn"
 
     val all: List<DictateLanguage> = listOf(
         // Stays first: `of` and `parseSelection` fall back to `all.first()` meaning "let the model decide".
@@ -85,7 +86,8 @@ object DictateLanguages {
         DictateLanguage("ha", "Hausa"),
         DictateLanguage("haw", "Hawaiian"),
         DictateLanguage("he", "Hebrew"),
-        DictateLanguage("hi", "Hindi"),
+        DictateLanguage(HINGLISH, "Hinglish (English letters)"),
+        DictateLanguage("hi", "Hindi (Devanagari)"),
         DictateLanguage("hu", "Hungarian"),
         DictateLanguage("is", "Icelandic"),
         DictateLanguage("id", "Indonesian"),

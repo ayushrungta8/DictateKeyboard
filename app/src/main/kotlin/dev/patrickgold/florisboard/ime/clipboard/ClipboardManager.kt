@@ -20,6 +20,8 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.Context
 import android.net.Uri
+import dev.patrickgold.florisboard.FlorisImeService
+import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.FlorisPreferenceStore
 import dev.patrickgold.florisboard.appContext
 import dev.patrickgold.florisboard.editorInstance
@@ -140,6 +142,10 @@ class ClipboardManager(
     private val systemClipboardManager = context.systemService(AndroidClipboardManager::class)
 
     private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val typingScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private var typingJob: Job? = null
+    private var typingGeneration = 0L
+    val isTypingOut = MutableStateFlow(false)
     private val cleanUpJob: Job
     private var clipHistoryDb: ClipboardHistoryDatabase? = null
     private val clipHistoryDao: ClipboardHistoryDao? get() = clipHistoryDb?.clipboardItemDao()
@@ -532,12 +538,50 @@ class ClipboardManager(
     }
 
     fun pasteItem(item: ClipboardItem) {
+        cancelTypeOut()
         val editorInstance by appContext.editorInstance()
         editorInstance.commitClipboardItem(item).also { result ->
             if (!result) {
                 appContext.showShortToastSync("Failed to paste item.")
             }
         }
+    }
+
+    /** Explicit fallback. Never starts automatically after a paste that may already have succeeded. */
+    fun typeOutItem(item: ClipboardItem) {
+        cancelTypeOut()
+        if (item.type != ItemType.TEXT) return
+        val text = item.text ?: return
+        val connection = FlorisImeService.currentInputConnection() ?: return
+        val generation = typingGeneration
+        isTypingOut.value = true
+        typingJob = typingScope.launch {
+            try {
+                connection.finishComposingText()
+                val accepted = typeClipboardText(
+                    text = text,
+                    isCurrentEditor = {
+                        generation == typingGeneration &&
+                            FlorisImeService.currentInputConnection() === connection
+                    },
+                    commit = { editorInstance.commitTextRaw(it) },
+                    pause = { delay(20) },
+                )
+                if (!accepted && generation == typingGeneration) {
+                    appContext.showShortToastSync(R.string.clip__type_out_failed)
+                }
+            } finally {
+                if (generation == typingGeneration) isTypingOut.value = false
+            }
+        }
+    }
+
+    /** Called before switching fields, hiding the IME, starting another clip or closing the manager. */
+    fun cancelTypeOut() {
+        typingGeneration++
+        typingJob?.cancel()
+        typingJob = null
+        isTypingOut.value = false
     }
 
     /**
@@ -561,5 +605,6 @@ class ClipboardManager(
     override fun close() {
         systemClipboardManager.removePrimaryClipChangedListener(this)
         cleanUpJob.cancel()
+        cancelTypeOut()
     }
 }

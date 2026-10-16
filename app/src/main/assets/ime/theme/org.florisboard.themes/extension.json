@@ -13,6 +13,24 @@
   },
   "themes": [
     {
+      "id": "personal_swift",
+      "label": "Ayush Borderless Black",
+      "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],
+      "isNight": true
+    },
+    {
+      "id": "personal_light",
+      "label": "Ayush Light",
+      "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],
+      "isNight": false
+    },
+    {
+      "id": "personal_dark",
+      "label": "Ayush Dark",
+      "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],
+      "isNight": true
+    },
+    {
       "id": "dictate_glass",
       "label": "Dictate Glass",
       "authors": [ "DevEmperor" ],

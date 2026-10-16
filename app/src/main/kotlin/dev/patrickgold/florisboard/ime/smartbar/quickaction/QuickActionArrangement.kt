@@ -80,6 +80,7 @@ data class QuickActionArrangement(
             // a hidden action is invisible until someone opens the actions editor, which is the opposite
             // of what a default is for.
             dynamicActions = listOf(
+                QuickAction.InsertKey(TextKeyData.IME_UI_MODE_CLIPBOARD),
                 // --- The dictation loop -------------------------------------------------------------
                 // The prompt panel opener. The live prompt is no longer a Smartbar button – it lives as a
                 // chip inside the prompt panel/row – so only the opener remains here. It costs a fresh
@@ -94,7 +95,6 @@ data class QuickActionArrangement(
                 // moment the actions row is on screen: the bar shows the actions when the field is idle
                 // and during a selection, not mid-word.
                 QuickAction.InsertKey(TextKeyData.DICTATE_REINSERT),
-                QuickAction.InsertKey(TextKeyData.IME_UI_MODE_CLIPBOARD),
                 // On-device translation (issue #424). Third, ahead of GIF: it is the start of an errand
                 // like the two before it, nobody looks for it in a keyboard until they see it there, and
                 // Gboard keeps its translate button in the visible bar — which is where people switching

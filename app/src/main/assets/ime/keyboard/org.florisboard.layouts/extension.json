@@ -515,6 +515,12 @@
     ],
     "charactersMod": [
       {
+        "id": "personal_qwerty",
+        "label": "Ayush QWERTY",
+        "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],
+        "direction": "ltr"
+      },
+      {
         "id": "default",
         "label": "Default character modifier layout",
         "authors": [ "patrickgold" ],

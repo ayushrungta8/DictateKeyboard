@@ -158,8 +158,8 @@ private fun computeLanguageDisplayName(locale: FlorisLocale, displayLanguageName
         return cachedDisplayName
     }
     val displayName = when (displayLanguageNamesIn) {
-        DisplayLanguageNamesIn.SYSTEM_LOCALE -> locale.displayName()
-        DisplayLanguageNamesIn.NATIVE_LOCALE -> locale.displayName(locale)
+        DisplayLanguageNamesIn.SYSTEM_LOCALE -> locale.displayLanguage()
+        DisplayLanguageNamesIn.NATIVE_LOCALE -> locale.displayLanguage(locale)
     }
     cachedDisplayNameState = Triple(locale, displayLanguageNamesIn, displayName)
     return displayName
@@ -197,9 +197,7 @@ fun ComputingEvaluator.computeLabel(data: KeyData): String? {
             KeyCode.VIEW_PHONE2 -> {
                 evaluator.context()?.getString(R.string.key__view_phone2)
             }
-            KeyCode.VIEW_SYMBOLS -> {
-                evaluator.context()?.getString(R.string.key__view_symbols)
-            }
+            KeyCode.VIEW_SYMBOLS -> "123"
             KeyCode.VIEW_SYMBOLS2 -> {
                 evaluator.context()?.getString(R.string.key__view_symbols2)
             }
@@ -408,8 +406,8 @@ fun ComputingEvaluator.computeImageVector(data: KeyData): ImageVector? {
         }
         KeyCode.SHIFT -> {
             when (evaluator.state.inputShiftState != InputShiftState.UNSHIFTED) {
-                true -> Icons.Default.KeyboardCapslock
-                else -> Icons.Default.KeyboardArrowUp
+                true -> dev.patrickgold.florisboard.ime.smartbar.PersonalIcons.ShiftActive
+                else -> dev.patrickgold.florisboard.ime.smartbar.PersonalIcons.Shift
             }
         }
         KeyCode.SPACE, KeyCode.CJK_SPACE -> {

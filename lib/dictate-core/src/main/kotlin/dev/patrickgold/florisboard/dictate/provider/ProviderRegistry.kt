@@ -904,8 +904,8 @@ object ProviderRegistry {
         supportsDynamicModels = false,
         apiKeyUrl = null,
         // Base is the recommended balance of accuracy/speed; tiny is offered for low-end devices.
-        defaultTranscriptionModel = "whisper-base",
-        curatedTranscriptionModels = listOf("whisper-base", "whisper-tiny"),
+        defaultTranscriptionModel = "whisper-small",
+        curatedTranscriptionModels = listOf("whisper-small", "whisper-base", "dolphin-base"),
     )
 
     /** All built-in presets in display order. The custom option is added by the UI on top of these. */

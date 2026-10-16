@@ -194,6 +194,13 @@ class TextKey(override val data: AbstractKeyData) : Key(data) {
                     else -> 1.00f
                 }
             }
+            if (keyboardMode == KeyboardMode.CHARACTERS) {
+                when (computed.code) {
+                    KeyCode.VIEW_SYMBOLS -> flayWidthFactor = 1f
+                    KeyCode.ENTER -> flayWidthFactor = 1.5f
+                    KeyCode.SHIFT, KeyCode.DELETE -> flayWidthFactor = 1.5f
+                }
+            }
         }
     }
 
