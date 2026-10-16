@@ -108,41 +108,55 @@ class PersonalClipboardTest {
             await("Password type-out did not finish") { !manager.isTypingOut.value }
 
             val clipboard = context.getSystemService(ClipboardManager::class.java)
-            instrumentation.runOnMainSync {
-                clipboard.setPrimaryClip(ClipData.newPlainText("test", phrase))
-            }
-            await("History did not retain copied text") { manager.currentHistory.all.any { it.text == phrase } }
-            instrumentation.runOnMainSync { clipboard.clearPrimaryClip() }
-            SystemClock.sleep(500)
-            assertTrue(manager.currentHistory.all.any { it.text == phrase })
-            instrumentation.runOnMainSync {
-                val keyboard by context.keyboardManager()
-                keyboard.activeState.imeUiMode = ImeUiMode.CLIPBOARD
-            }
-            SystemClock.sleep(500)
-            instrumentation.uiAutomation.takeScreenshot()?.let { bitmap ->
-                java.io.File(context.filesDir, "clipboard-preview.png").outputStream().use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            var originalClip: ClipData? = null
+            instrumentation.runOnMainSync { originalClip = clipboard.primaryClip }
+            val capturePreview = InstrumentationRegistry.getArguments().getString("capturePreview") == "true"
+            try {
+                instrumentation.runOnMainSync {
+                    clipboard.setPrimaryClip(ClipData.newPlainText("test", phrase))
                 }
-                bitmap.recycle()
-            }
-            // Visual smoke capture on the documented Pixel 8 emulator (1080 x 2400).
-            // The clipboard item's bounds were inspected in clipboard-preview.png.
-            val automation = instrumentation.uiAutomation
-            val touchAt = SystemClock.uptimeMillis()
-            instrumentation.sendPointerSync(android.view.MotionEvent.obtain(
-                touchAt, touchAt, android.view.MotionEvent.ACTION_DOWN, 250f, 1810f, 0))
-            SystemClock.sleep(700)
-            instrumentation.sendPointerSync(android.view.MotionEvent.obtain(
-                touchAt, SystemClock.uptimeMillis(), android.view.MotionEvent.ACTION_UP, 250f, 1810f, 0))
-            SystemClock.sleep(400)
-            automation.takeScreenshot()?.let { bitmap ->
-                java.io.File(context.filesDir, "clipboard-menu-preview.png").outputStream().use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                await("History did not retain copied text") { manager.currentHistory.all.any { it.text == phrase } }
+                instrumentation.runOnMainSync { clipboard.clearPrimaryClip() }
+                SystemClock.sleep(500)
+                assertTrue(manager.currentHistory.all.any { it.text == phrase })
+                if (capturePreview) {
+                instrumentation.runOnMainSync {
+                    val keyboard by context.keyboardManager()
+                    keyboard.activeState.imeUiMode = ImeUiMode.CLIPBOARD
                 }
-                bitmap.recycle()
+                SystemClock.sleep(500)
+                instrumentation.uiAutomation.takeScreenshot()?.let { bitmap ->
+                    java.io.File(context.filesDir, "clipboard-preview.png").outputStream().use {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    }
+                    bitmap.recycle()
+                }
+                // Visual smoke capture on the documented Pixel 8 emulator (1080 x 2400).
+                // The clipboard item's bounds were inspected in clipboard-preview.png.
+                val automation = instrumentation.uiAutomation
+                val touchAt = SystemClock.uptimeMillis()
+                instrumentation.sendPointerSync(android.view.MotionEvent.obtain(
+                    touchAt, touchAt, android.view.MotionEvent.ACTION_DOWN, 250f, 1810f, 0))
+                SystemClock.sleep(700)
+                instrumentation.sendPointerSync(android.view.MotionEvent.obtain(
+                    touchAt, SystemClock.uptimeMillis(), android.view.MotionEvent.ACTION_UP, 250f, 1810f, 0))
+                SystemClock.sleep(400)
+                automation.takeScreenshot()?.let { bitmap ->
+                    java.io.File(context.filesDir, "clipboard-menu-preview.png").outputStream().use {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    }
+                    bitmap.recycle()
+                }
+                }
+            } finally {
+                // The physical-phone run must leave the user's clipboard as it found it.
+                instrumentation.runOnMainSync {
+                    if (originalClip != null) clipboard.setPrimaryClip(originalClip!!) else clipboard.clearPrimaryClip()
+                    if (!capturePreview) manager.currentHistory.all.filter { it.text == phrase }.forEach {
+                        manager.deleteClip(it, onlyIfUnpinned = false)
+                    }
+                }
             }
-
         }
     }
 }

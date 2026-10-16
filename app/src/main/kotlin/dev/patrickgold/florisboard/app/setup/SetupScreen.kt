@@ -956,7 +956,7 @@ private fun FlorisStepLayoutScope.OnDeviceChoice(
 ) {
     val context = LocalContext.current
     val prefs by FlorisPreferenceStore
-    val picks = remember { listOf(LocalModelCatalog.WHISPER_SMALL, LocalModelCatalog.WHISPER_BASE) }
+    val picks = remember { listOf(LocalModelCatalog.HINGLISH_APEX, LocalModelCatalog.WHISPER_SMALL) }
     val downloads by LocalModelDownloads.state.collectAsState()
     val installedTick by LocalModelDownloads.installedTick.collectAsState()
     // Only the two on offer, not the whole catalog: this runs during composition.

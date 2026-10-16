@@ -1,5 +1,5 @@
 > **Personal fork: Ayush Keyboard**
-> Persistent clipboard, explicit **Type it out** fallback, and offline English/Hindi dictation defaults.
+> Persistent clipboard, explicit **Type it out** fallback, and offline Roman Hinglish/English dictation.
 > See [our changes and build instructions](docs/PERSONAL_KEYBOARD.md) and [model research](docs/MODEL_RESEARCH.md).
 > Upstream Dictate documentation follows below; cloud features remain optional.
 

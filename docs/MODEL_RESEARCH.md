@@ -1,3 +1,28 @@
+# Current target: Roman Hinglish
+
+The user means Hindi/English mixed in one sentence, written in English letters: “jaise ki YouTube, Banana, and Apple”. Generic Hindi recognition and Devanagari output do not meet this requirement.
+
+The updated build separates **HING** (Roman Hinglish) from **EN** (ordinary English). HING uses Oriserve Hindi2Hinglish-Apex by default; Swift is a smaller, faster alternative selectable in local-model settings. EN retains the original multilingual Whisper Small engine. These models directly emit Roman Hinglish; there is no word-replacement dictionary pretending to fix misrecognition.
+
+## Evidence from the connected Samsung SM-S928B
+
+| Fixture | New output | Apex time | Swift time |
+|---|---|---|---|
+| Public short Hindi recording | Main kal call karoon kya? | 8.7 s cold | 1.8 s cold |
+| Synthetic mixed speech | Kal morning mein meeting hai aur uske baad please send the report. | 4.9 s warm | 0.7 s warm |
+
+The original English fixture still produced “Please send the meeting notes tomorrow morning.” using the original engine. The larger Apex also handled more of the public noisy fixtures correctly in a small desktop comparison.
+
+**Limit:** both models still made errors on a robotic eSpeak version of the user's YouTube/Banana/Apple example. Swift lost the fruit words; Apex retained “banaana and apple” but mangled the opening/brand. This is not a verified fix for the user's real voice or proof of Wispr parity. The app did not retain the user's previous failed recordings, so those could not be replayed. Further evaluation needs natural mixed-language speech, especially names and brands. No synthetic test is labelled as human speech.
+
+Apex download is about 1.04 GB; Swift about 161 MB. Models were exported from pinned upstream safetensors with the sherpa-onnx Whisper exporter, quantized to int8, and verified in the Android runtime. Source revisions and SHA256 hashes accompany the model assets. See `tools/models/export-hinglish.py` and the model's Apache-2.0 attribution in the app.
+
+Sources: [Oriserve Apex](https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Apex), [Oriserve Swift](https://huggingface.co/Oriserve/Whisper-Hindi2Hinglish-Swift).
+
+---
+
+The following records the initial generic-Hindi investigation and baseline results; it is retained as history, not the current model decision.
+
 # Offline English/Hindi dictation — model decision
 
 Checked 16 October 2026. These are research-based candidates, not a benchmark on Ayush’s phone. We have no matched recordings of Ayush’s speech in this repository. Separate pure English, pure Hindi and within-sentence English/Hindi switching in evaluation; a language list does not establish the last one.
@@ -53,3 +78,7 @@ The Android 16 arm64 emulator ran Whisper Small with Wi-Fi and mobile data disab
 The first purely synthetic Hindi fixture produced repeated “र”; replacing it with a public dataset sample improved the result but still left recognition errors. Therefore **do not describe this build as Wispr-quality Hindi/Hinglish**. The initial engine is a functioning baseline, and recognition quality is the main remaining product limitation.
 
 Hindi fixture: `a_hindi/54.wav` inside [this public dataset’s archive](https://huggingface.co/datasets/datasetsANDmodels/hindi-stt-dataset/blob/main/a_hindi.zip), with reference text from [its transcription file](https://huggingface.co/datasets/datasetsANDmodels/hindi-stt-dataset/blob/main/a_transcription.txt). The fixture audio is not redistributed in the fork or APK. Public dataset provenance is not independently verified. The Android smoke test checks that the runtime returns text and Hindi script; it does not certify accuracy.
+
+## Physical phone check
+
+On the connected Samsung SM-S928B (Android 16), the same local recognition smoke test took approximately 2.9 s for English, 3.6 s for Hindi and 4.0 s for mixed speech. Output quality was similar to the emulator: exact English in this fixture, Hindi recognition errors, and inaccurate Romanized Hindi in the mixed synthetic fixture. The phone's radios were left unchanged; this run exercised the local provider directly. Offline capability was separately verified with emulator radios off.

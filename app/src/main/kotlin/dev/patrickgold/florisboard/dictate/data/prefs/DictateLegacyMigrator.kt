@@ -41,6 +41,15 @@ import dev.patrickgold.florisboard.ime.text.keyboard.TextKeyData
  * Must be called only after [FlorisPreferenceStore] has finished loading.
  */
 object DictateLegacyMigrator {
+    /** Correct the personal fork's original Hindi-vs-Hinglish assumption once. */
+    suspend fun migratePersonalHinglishIfNeeded() {
+        val prefs by FlorisPreferenceStore
+        if (prefs.dictate.personalHinglishMigrated.get()) return
+        prefs.dictate.inputLanguages.set("hi-Latn,en")
+        prefs.dictate.activeInputLanguage.set("hi-Latn")
+        prefs.dictate.personalHinglishMigrated.set(true)
+    }
+
 
     @Suppress("DEPRECATION") // writes the deprecated flat prefs that migrateProviderKeyringIfNeeded folds in
     suspend fun migrateIfNeeded(context: Context) {

@@ -141,6 +141,7 @@ class FlorisApplication : Application() {
             PreferenceRecovery.refresh(this@FlorisApplication)
             DictateLegacyMigrator.migrateIfNeeded(this@FlorisApplication)
             DictateLegacyMigrator.seedDeviceLanguageIfNeeded()
+            DictateLegacyMigrator.migratePersonalHinglishIfNeeded()
             DictateLegacyMigrator.migrateProviderKeyringIfNeeded()
             DictateLegacyMigrator.removeLivePromptActionIfNeeded(this@FlorisApplication)
             DictateLegacyMigrator.migratePromptsActionIfNeeded(this@FlorisApplication)

@@ -4743,6 +4743,10 @@ object DictateController {
             ?: preset.defaultTranscriptionModel
             ?: fallback
         if (preset.transcriptionApi != TranscriptionApi.LOCAL_ONDEVICE) return chosen
+        // Hinglish is a distinct output contract. Never silently use generic Hindi/Devanagari.
+        val language = prefs.dictate.activeInputLanguage.get()
+        val personalModel = LocalModelCatalog.personalModelForLanguage(language, chosen)
+        if (language == DictateLanguages.HINGLISH || personalModel != chosen) return personalModel
         if (chosen.isNotBlank() && LocalModelManager.isInstalled(context, chosen)) return chosen
         return account.realtimeModel.takeIf {
             it.isNotBlank() && LocalModelManager.isInstalled(context, it)

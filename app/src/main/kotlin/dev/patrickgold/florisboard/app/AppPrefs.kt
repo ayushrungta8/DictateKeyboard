@@ -886,13 +886,13 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // (see DictateLanguages; "detect" = auto-detect). This fork starts with English and Hindi.
         val inputLanguages = string(
             key = "dictate__input_languages",
-            default = "detect,en,hi",
+            default = "hi-Latn,en",
         )
         // The currently active dictation language code; persists across sessions and is switched
         // from the recording bar's language chip.
         val activeInputLanguage = string(
             key = "dictate__active_input_language",
-            default = "detect",
+            default = "hi-Latn",
         )
         // Switching the keyboard's language also switches the dictation language, when that language is
         // one of inputLanguages (issue #431). Off by default: #347 settled that a layout says nothing
@@ -905,6 +905,10 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // Guard so the one-time seeding of the device/system dictation language (added on top of the
         // default detect,en) runs only once on a fresh install. See
         // DictateLegacyMigrator.seedDeviceLanguageIfNeeded.
+        val personalHinglishMigrated = boolean(
+            key = "dictate__personal_hinglish_migrated",
+            default = false,
+        )
         val inputLanguagesSeeded = boolean(
             key = "dictate__input_languages_seeded",
             default = false,
