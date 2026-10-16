@@ -905,6 +905,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // Guard so the one-time seeding of the device/system dictation language (added on top of the
         // default detect,en) runs only once on a fresh install. See
         // DictateLegacyMigrator.seedDeviceLanguageIfNeeded.
+        val personalSwiftLayoutMigrated = boolean(key = "dictate__swiftkey_reference_layout_v1", default = false)
         val personalUiMigrated = boolean(key = "dictate__personal_ui_migrated", default = false)
         val personalHinglishMigrated = boolean(
             key = "dictate__personal_hinglish_migrated",

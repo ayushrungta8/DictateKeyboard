@@ -99,17 +99,7 @@ object FlorisImeSizing {
 
     @Composable
     fun smartbarRowCountAsState(): State<Int> {
-        val context = LocalContext.current
-        val nlp by context.nlpManager()
-        val candidates by nlp.activeCandidatesFlow.collectAsState()
-        val inline by NlpInlineAutofill.suggestions.collectAsState()
-        val state by DictateController.state.collectAsState()
-        return remember {
-            derivedStateOf {
-                val hasStatus = state !is DictateController.UiState.Idle && state !is DictateController.UiState.Promo
-                if (candidates.isNotEmpty() || inline.isNotEmpty() || hasStatus) 1 else 0
-            }
-        }
+        return remember { derivedStateOf { 1 } }
     }
 
     @Composable

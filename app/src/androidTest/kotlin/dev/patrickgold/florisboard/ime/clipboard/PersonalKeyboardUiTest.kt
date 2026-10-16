@@ -1,7 +1,6 @@
 package dev.patrickgold.florisboard.ime.clipboard
 
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.SystemClock
 import android.text.InputType
@@ -60,7 +59,7 @@ class PersonalKeyboardUiTest {
         return automation.windows.mapNotNull { it.root }.firstNotNullOfOrNull { visit(it) }
     }
 
-    private fun tap(label: String) {
+    private fun tap(label: String, holdMs: Long = 60) {
         var node: AccessibilityNodeInfo? = null
         await("Control not visible: $label") { node = find(label); node != null }
         // Real touches also verify hit targets; virtual ACTION_CLICK IDs can be retired between IME panels.
@@ -70,18 +69,20 @@ class PersonalKeyboardUiTest {
         val at = SystemClock.uptimeMillis()
         instrument.sendPointerSync(android.view.MotionEvent.obtain(at, at,
             android.view.MotionEvent.ACTION_DOWN, bounds.exactCenterX(), bounds.exactCenterY(), 0))
-        instrument.sendPointerSync(android.view.MotionEvent.obtain(at, at + 60,
+        if (holdMs > 60) SystemClock.sleep(holdMs)
+        instrument.sendPointerSync(android.view.MotionEvent.obtain(at, SystemClock.uptimeMillis(),
             android.view.MotionEvent.ACTION_UP, bounds.exactCenterX(), bounds.exactCenterY(), 0))
         SystemClock.sleep(250)
     }
 
     private fun capture(name: String) {
-        SystemClock.sleep(350)
-        val bitmap = checkNotNull(automation.takeScreenshot())
-        java.io.File(context.filesDir, "ui-$name.png").outputStream().use {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        instrument.waitForIdleSync()
+        automation.waitForIdle(200, 2000)
+        SystemClock.sleep(500)
+        // UiAutomation.takeScreenshot can omit glyph layers on this emulator; screencap captures the actual compositor.
+        android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("screencap -p")).use { input ->
+            java.io.File(context.filesDir, "ui-$name.png").outputStream().use { input.copyTo(it) }
         }
-        bitmap.recycle()
     }
 
     @Test
@@ -121,12 +122,40 @@ class PersonalKeyboardUiTest {
             }
             val keyboard by context.keyboardManager()
             await("Keyboard did not connect") { find("Open clipboard") != null }
-            tap("English dictation")
-            await("EN was not selected") { prefs.dictate.activeInputLanguage.get() == "en" }
+            if (InstrumentationRegistry.getArguments().getString("previewOnly") == "true") {
+                capture("phone-keyboard")
+                tap("Open clipboard")
+                capture("phone-clipboard")
+                tap("Keyboard")
+                return
+            }
             tap("Hinglish, English letters")
+            await("EN was not selected") { prefs.dictate.activeInputLanguage.get() == "en" }
+            tap("English dictation")
             await("HING was not selected") { prefs.dictate.activeInputLanguage.get() == DictateLanguages.HINGLISH }
             capture("keyboard")
+            if (InstrumentationRegistry.getArguments().getString("inspectPreview") == "true") SystemClock.sleep(10000)
             if (InstrumentationRegistry.getArguments().getString("testMic") == "true") {
+                tap("1")
+                await("Number row did not insert a digit") { field.text.toString() == "1" }
+                instrument.runOnMainSync { field.setText("") }
+                SystemClock.sleep(350)
+                tap("Q")
+                await("Uppercase key face changed lowercase typing") { field.text.toString() == "q" }
+                instrument.runOnMainSync { field.setText("") }
+                SystemClock.sleep(350)
+                tap("Q", holdMs = 650)
+                await("Q long-press did not insert its displayed percent symbol") { field.text.toString() == "%" }
+                instrument.runOnMainSync { field.setText("") }
+                SystemClock.sleep(350)
+                tap(".", holdMs = 650)
+                await("Period long-press did not insert a question mark") { field.text.toString() == "?" }
+                instrument.runOnMainSync { field.setText("") }
+                SystemClock.sleep(350)
+                tap(",", holdMs = 650)
+                await("Comma long-press did not start dictation") { DictateController.state.value is DictateController.UiState.Recording }
+                tap("Cancel recording")
+                await("Comma recording did not cancel") { DictateController.state.value is DictateController.UiState.Idle }
                 tap("Dictate")
                 await("Mic did not start recording") { DictateController.state.value is DictateController.UiState.Recording }
                 capture("recording")

@@ -38,9 +38,11 @@ Install the APK, enable **Ayush Keyboard** in Android keyboard settings, select 
 
 ## Keyboard UI
 
-The keyboard uses matched light/dark themes with flat keycaps and a compact toolbar. The layout takes cues from Gboard's restrained toolbar/keycaps and SwiftKey's direct clipboard access. HING and EN are always visible; the dedicated mic sits at the right edge and becomes Stop while recording or processing. Occasional tools live under the three-dot menu. The suggestion/status row only occupies space while it has content.
+The layout follows the user's actual SwiftKey setup captured on the Galaxy S24 Ultra: borderless black keys, separate digit row, uppercase key faces, centered symbol hints, and the same bottom-row spacing. Letter faces are uppercase for readability; normal typing still inserts lowercase until Shift is active. The seven-slot toolbar keeps clipboard in the fourth position, the current HING/EN toggle in the fifth, and dictation in the sixth. A stable three-slot prediction row sits below it. Comma also starts dictation on long press.
 
-Clipboard uses full-width text previews and visible Paste, Type out and pin actions. All/Pinned filters and search are available without a long press. Existing local history and manual deletion remain available. The one-time appearance migration sets the new theme pair; subsequent user theme changes are preserved.
+Clipboard follows SwiftKey's compact two-column grid with white previews on black. Paste, Type out, pinning, search, and a pinned-only toggle are directly accessible. Saved clips do not expire by default; existing local history and manual deletion remain available. The one-time appearance migration applies this layout while preserving models and history; later theme customization is preserved.
+
+The reference was captured at 1080 × 2340, density 450, font scale 0.8. Emulator captures use the same screen configuration; Android's system navigation controls differ between devices.
 
 Captured from the running emulator using synthetic clipboard content:
 
@@ -48,7 +50,7 @@ Captured from the running emulator using synthetic clipboard content:
 
 ![Clipboard](screenshots/clipboard.png)
 
-The UI integration check switches HING/EN, starts and discards a recording on the emulator, returns between keyboard and clipboard, pins a clip, and verifies Paste and Type out against a real Android field. It leaves the primary clipboard unchanged and deletes its own test entry. Android's virtual-node cache is cleared between panel queries so the check does not act on a stale view of the previous panel.
+The UI integration check switches HING/EN, verifies lowercase insertion from uppercase faces, the digit row and symbol holds, starts and discards recordings from both mic shortcuts on the emulator, returns between keyboard and clipboard, pins a clip, and verifies Paste and Type out against a real Android field. It leaves the primary clipboard unchanged and deletes its own test entry. Android's virtual-node cache is cleared between panel queries so the check does not act on a stale view of the previous panel.
 
 ## Earlier engine and clipboard phone validation
 

@@ -170,7 +170,8 @@ fun ComputingEvaluator.computeLabel(data: KeyData): String? {
     return if (data.type == KeyType.CHARACTER && data.code != KeyCode.SPACE && data.code != KeyCode.CJK_SPACE
         && data.code != KeyCode.HALF_SPACE && data.code != KeyCode.KESHIDA || data.type == KeyType.NUMERIC
     ) {
-        data.asString(isForDisplay = true)
+        val label = data.asString(isForDisplay = true)
+        if (evaluator.keyboard.mode == KeyboardMode.CHARACTERS && data.code in 97..122) label.uppercase() else label
     } else {
         when (data.code) {
             KeyCode.PHONE_PAUSE -> evaluator.context()?.getString(R.string.key__phone_pause)
@@ -197,9 +198,7 @@ fun ComputingEvaluator.computeLabel(data: KeyData): String? {
             KeyCode.VIEW_PHONE2 -> {
                 evaluator.context()?.getString(R.string.key__view_phone2)
             }
-            KeyCode.VIEW_SYMBOLS -> {
-                evaluator.context()?.getString(R.string.key__view_symbols)
-            }
+            KeyCode.VIEW_SYMBOLS -> "123"
             KeyCode.VIEW_SYMBOLS2 -> {
                 evaluator.context()?.getString(R.string.key__view_symbols2)
             }
@@ -408,8 +407,8 @@ fun ComputingEvaluator.computeImageVector(data: KeyData): ImageVector? {
         }
         KeyCode.SHIFT -> {
             when (evaluator.state.inputShiftState != InputShiftState.UNSHIFTED) {
-                true -> Icons.Default.KeyboardCapslock
-                else -> Icons.Default.KeyboardArrowUp
+                true -> dev.patrickgold.florisboard.ime.smartbar.PersonalIcons.ShiftActive
+                else -> dev.patrickgold.florisboard.ime.smartbar.PersonalIcons.Shift
             }
         }
         KeyCode.SPACE, KeyCode.CJK_SPACE -> {

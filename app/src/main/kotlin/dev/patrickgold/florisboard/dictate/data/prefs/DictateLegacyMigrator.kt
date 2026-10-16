@@ -64,6 +64,21 @@ object DictateLegacyMigrator {
         prefs.dictate.personalUiMigrated.set(true)
     }
 
+    /** Match the user's captured borderless SwiftKey setup, including its separate number row. */
+    suspend fun migratePersonalSwiftLayoutIfNeeded() {
+        val prefs by FlorisPreferenceStore
+        if (prefs.dictate.personalSwiftLayoutMigrated.get()) return
+        prefs.theme.dayThemeId.set(extCoreTheme("personal_swift"))
+        prefs.theme.nightThemeId.set(extCoreTheme("personal_swift"))
+        prefs.theme.accentColor.set(Color.White)
+        prefs.keyboard.numberRow.set(true)
+        prefs.keyboard.keySpacingHorizontal.set(0)
+        prefs.keyboard.hintedNumberRowEnabled.set(false)
+        prefs.suggestion.displayMode.set(dev.patrickgold.florisboard.ime.smartbar.CandidatesDisplayMode.CLASSIC)
+        prefs.keyboard.utilityKeyAction.set(dev.patrickgold.florisboard.ime.text.key.UtilityKeyAction.SWITCH_TO_EMOJIS)
+        prefs.dictate.personalSwiftLayoutMigrated.set(true)
+    }
+
     @Suppress("DEPRECATION") // writes the deprecated flat prefs that migrateProviderKeyringIfNeeded folds in
     suspend fun migrateIfNeeded(context: Context) {
         val prefs by FlorisPreferenceStore

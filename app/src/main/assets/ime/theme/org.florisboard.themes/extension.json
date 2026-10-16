@@ -13,6 +13,12 @@
   },
   "themes": [
     {
+      "id": "personal_swift",
+      "label": "Ayush Borderless Black",
+      "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],
+      "isNight": true
+    },
+    {
       "id": "personal_light",
       "label": "Ayush Light",
       "authors": [ "The FlorisBoard Contributors", "Ayush Keyboard" ],

@@ -143,6 +143,7 @@ class FlorisApplication : Application() {
             DictateLegacyMigrator.seedDeviceLanguageIfNeeded()
             DictateLegacyMigrator.migratePersonalHinglishIfNeeded()
             DictateLegacyMigrator.migratePersonalUiIfNeeded()
+            DictateLegacyMigrator.migratePersonalSwiftLayoutIfNeeded()
             DictateLegacyMigrator.migrateProviderKeyringIfNeeded()
             DictateLegacyMigrator.removeLivePromptActionIfNeeded(this@FlorisApplication)
             DictateLegacyMigrator.migratePromptsActionIfNeeded(this@FlorisApplication)

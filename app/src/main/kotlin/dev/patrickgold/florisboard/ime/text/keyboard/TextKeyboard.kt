@@ -74,8 +74,13 @@ class TextKeyboard(
         val rowMarginV = (keyboardHeight - desiredTouchBounds.height * rowCount.toFloat()) / (rowCount - 1).coerceAtLeast(1).toFloat()
         val gap = effectiveSplitGap(keyboardWidth, splitGap)
 
+        val compactDigits = mode == KeyboardMode.CHARACTERS && arrangement.firstOrNull()?.all {
+            it.data.compute(dev.patrickgold.florisboard.ime.keyboard.DefaultComputingEvaluator)?.type ==
+                dev.patrickgold.florisboard.ime.text.key.KeyType.NUMERIC
+        } == true
         for ((r, row) in rows().withIndex()) {
-            val posY = (desiredTouchBounds.height + rowMarginV) * r
+            val digitOffset = if (compactDigits && r > 0) desiredTouchBounds.height * 0.12f else 0f
+            val posY = (desiredTouchBounds.height + rowMarginV) * r - digitOffset
             val extendDownwards = extendTouchBoundariesDownwards && r + 1 == arrangement.size
             val seam = if (gap > 0.0f) seamIndexOf(row) else 0
             if (seam <= 0) {
@@ -108,6 +113,13 @@ class TextKeyboard(
                     rowMarginH = rowMarginH,
                     extendTouchBoundariesDownwards = extendDownwards,
                 )
+            }
+            if (compactDigits && r == 0) {
+                row.forEach { key ->
+                    key.touchBounds.bottom = key.touchBounds.top + key.touchBounds.height * 0.80f
+                    key.visibleBounds.top = posY + (key.visibleBounds.top - posY) * 0.80f
+                    key.visibleBounds.bottom = posY + (key.visibleBounds.bottom - posY) * 0.80f
+                }
             }
         }
     }

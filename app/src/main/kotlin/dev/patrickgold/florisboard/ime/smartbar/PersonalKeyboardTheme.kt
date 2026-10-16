@@ -25,12 +25,12 @@ fun PersonalKeyboardTheme(content: @Composable () -> Unit) {
     val scheme = base.copy(
         primary = accent,
         onPrimary = if (accent.luminance() > 0.179f) Color.Black else Color.White,
-        primaryContainer = if (dark) Color(0xFFC4CCE8) else Color(0xFFDAE1F3),
-        onPrimaryContainer = Color(0xFF252D47),
+        primaryContainer = if (dark) Color(0xFF333333) else Color(0xFFDAE1F3),
+        onPrimaryContainer = if (dark) Color.White else Color(0xFF252D47),
         surface = surface,
         onSurface = ink,
-        surfaceContainer = if (dark) lerp(surface, ink, 0.07f) else Color.White,
-        surfaceContainerHigh = lerp(surface, ink, 0.08f),
+        surfaceContainer = if (dark) Color(0xFF202020) else Color.White,
+        surfaceContainerHigh = if (dark) Color(0xFF333333) else lerp(surface, ink, 0.08f),
         onSurfaceVariant = lerp(ink, surface, 0.18f),
         outlineVariant = lerp(surface, ink, 0.20f),
     )

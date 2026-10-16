@@ -112,10 +112,7 @@ sealed class ImeWindowSpec {
      * Calculates the Smartbar row height for given baseline [keyboardHeight].
      */
     fun calcSmartbarRowHeight(keyboardHeight: Dp): Dp {
-        val defRowHeight = calcRowHeight(constraints.defKeyboardHeight)
-        val rowHeight = calcRowHeight(keyboardHeight)
-        return defRowHeight * constraints.smartbarStaticScalingFactor +
-            rowHeight * constraints.smartbarDynamicScalingFactor
+        return 44.dp
     }
 
     // No upper bound on the rows (issue #418): it used to be 6, and the Hindi varnamala with a number row has
@@ -131,9 +128,9 @@ sealed class ImeWindowSpec {
     protected fun Dp.toBaseline(rowCount: Int, smartbarRowCount: Int): Dp  = let { effKeyboardHeight ->
         require(rowCount >= 4)
         require(smartbarRowCount in 0..2)
-        val staticSmartbarHeight = calcRowHeight(constraints.defKeyboardHeight * constraints.smartbarStaticScalingFactor * smartbarRowCount)
+        val staticSmartbarHeight = 44.dp * smartbarRowCount
         val keyboardHeight = ((effKeyboardHeight - staticSmartbarHeight - PersonalToolbarHeight) * constraints.baselineRowCount) /
-            (rowCount + constraints.smartbarDynamicScalingFactor * smartbarRowCount)
+            rowCount
         return keyboardHeight
     }
 

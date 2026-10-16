@@ -28,6 +28,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -385,7 +388,7 @@ private fun TextKeyButton(
                 val spaceBarMode by prefs.keyboard.spaceBarMode.collectAsState()
                 when (spaceBarMode) {
                     SpaceBarMode.NOTHING -> return@let
-                    SpaceBarMode.CURRENT_LANGUAGE -> {}
+                    SpaceBarMode.CURRENT_LANGUAGE -> customLabel = "Ayush Keyboard"
                     SpaceBarMode.SPACE_BAR_KEY -> customLabel = "␣"
                     // Collected here rather than in the evaluator, so switching the provider — from the
                     // keyboard's own picker as much as from the settings — relabels the key at once.
@@ -405,7 +408,13 @@ private fun TextKeyButton(
             SnyggText(
                 modifier = Modifier
                     .wrapContentSize()
-                    .align(if (isTelPadKey) BiasAlignment(-0.5f, 0f) else Alignment.Center),
+                    .align(when {
+                        isTelPadKey -> BiasAlignment(-0.5f, 0f)
+                        key.computedData.code == KeyCode.SPACE -> Alignment.BottomCenter
+                        evaluator.keyboard.mode == KeyboardMode.CHARACTERS && key.computedData.code in 65..122 -> BiasAlignment(0f, 0.30f)
+                        else -> Alignment.Center
+                    })
+                    .then(if (key.computedData.code == KeyCode.SPACE) Modifier.padding(bottom = 5.dp) else Modifier),
                 maxLines = shrink?.let { LONG_LABEL_MAX_LINES },
                 autoSizeMinRatio = shrink,
                 autoSizeOneLineRatio = shrink?.let { LONG_LABEL_ONE_LINE_RATIO },
@@ -421,10 +430,18 @@ private fun TextKeyButton(
                 selector = selector,
                 modifier = Modifier
                     .wrapContentSize()
-                    .align(if (isTelPadKey) BiasAlignment(0.5f, 0f) else Alignment.TopEnd),
+                    .align(if (isTelPadKey) BiasAlignment(0.5f, 0f) else Alignment.TopCenter),
                 maxLines = shrink?.let { 1 },
                 autoSizeMinRatio = shrink,
-                text = hintedLabel,
+                text = if (evaluator.keyboard.mode == KeyboardMode.CHARACTERS && key.computedData.code == 46) "!?" else hintedLabel,
+                fontSizeMultiplier = if (key.computedData.code == 46) 0.65f else 1f,
+            )
+        }
+        if (evaluator.keyboard.mode == KeyboardMode.CHARACTERS && key.computedData.code == 44) {
+            SnyggIcon(
+                imageVector = dev.patrickgold.florisboard.ime.smartbar.PersonalIcons.Mic,
+                modifier = Modifier.align(Alignment.TopCenter).size(10.dp),
+                contentDescription = null,
             )
         }
         key.foregroundImageVector?.let { imageVector ->

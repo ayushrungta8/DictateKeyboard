@@ -315,6 +315,16 @@ class LayoutManager(context: Context) {
             }
         }
 
+        if (keyboardMode == KeyboardMode.CHARACTERS && subtype.layoutMap.characters == extCoreLayout("qwerty")) {
+            for (row in computedArrangement) for (key in row) {
+                val code = key.data.compute(DefaultComputingEvaluator)?.code ?: continue
+                PersonalKeyLayout.hintFor(code)?.let { hint ->
+                    key.computedSymbolHint = TextKeyData(code = hint.code, label = hint.toString())
+                    key.computedNumberHint = null
+                }
+            }
+        }
+
         if (isSplit && keyboardMode.isSplittable()) {
             addSecondSpaceBar(computedArrangement)
         }
@@ -409,7 +419,9 @@ class LayoutManager(context: Context) {
                     extension = LTN(LayoutType.NUMERIC_ROW, subtype.layoutMap.numericRow)
                 }
                 main = LTN(LayoutType.CHARACTERS, subtype.layoutMap.characters)
-                modifier = LTN(LayoutType.CHARACTERS_MOD, extCoreLayout("default"))
+                modifier = LTN(LayoutType.CHARACTERS_MOD, extCoreLayout(
+                    if (subtype.layoutMap.characters == extCoreLayout("qwerty")) "personal_qwerty" else "default",
+                ))
             }
             KeyboardMode.NUMERIC -> {
                 main = LTN(LayoutType.NUMERIC, subtype.layoutMap.numeric)

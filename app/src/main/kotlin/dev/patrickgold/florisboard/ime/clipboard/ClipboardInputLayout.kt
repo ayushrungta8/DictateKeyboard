@@ -27,8 +27,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,6 +40,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.patrickgold.florisboard.app.FlorisPreferenceStore
 import dev.patrickgold.florisboard.clipboardManager
 import dev.patrickgold.florisboard.ime.ImeUiMode
@@ -66,7 +69,7 @@ import org.florisboard.lib.android.systemService
 const val CLIPBOARD_HISTORY_NUM_GRID_COLUMNS_AUTO: Int = 0
 private const val MaxThumbnailPx = 1024
 
-/** Full-width previews and explicit actions: pasting and typing are never hidden in a hold menu. */
+/** Compact saved-clip grid with explicit paste and type-out actions. */
 @Composable
 fun ClipboardInputLayout(modifier: Modifier = Modifier) {
     PersonalKeyboardTheme {
@@ -86,23 +89,21 @@ fun ClipboardInputLayout(modifier: Modifier = Modifier) {
                 .sortedWith(compareByDescending<ClipboardItem> { it.isPinned }.thenByDescending { it.creationTimestampMs })
         }
         val colors = MaterialTheme.colorScheme
-        val chipColors = FilterChipDefaults.filterChipColors(selectedContainerColor = colors.primaryContainer,
-            selectedLabelColor = colors.onPrimaryContainer, selectedLeadingIconColor = colors.onPrimaryContainer)
         Column(modifier.fillMaxWidth().height(FlorisImeSizing.panelUiHeight()).background(colors.surface)) {
             Row(Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { keyboard.activeState.imeUiMode = ImeUiMode.TEXT },
-                    colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurface),
-                    contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(20.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Keyboard", color = colors.onSurface)
+                IconButton(onClick = { keyboard.activeState.imeUiMode = ImeUiMode.TEXT }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Keyboard", Modifier.size(22.dp))
                 }
                 Text("Clipboard", Modifier.weight(1f).padding(start = 8.dp), color = colors.onSurface,
-                    style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                 IconButton(onClick = { keyboard.activateClipboardSearch() }, enabled = !locked && enabled && clips.isNotEmpty()) {
                     Icon(Icons.Default.Search, "Search clipboard")
+                }
+                IconButton(onClick = { pinnedOnly = !pinnedOnly }, enabled = !locked && enabled) {
+                    Icon(if (pinnedOnly) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                        if (pinnedOnly) "Show all clips" else "Show pinned clips")
                 }
             }
             if (locked) {
@@ -115,18 +116,14 @@ fun ClipboardInputLayout(modifier: Modifier = Modifier) {
                     Button(onClick = { scope.launch { prefs.clipboard.historyEnabled.set(true) } }) { Text("Enable clipboard") }
                 }
             } else {
-                Row(Modifier.fillMaxWidth().height(48.dp).padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FilterChip(selected = !pinnedOnly, onClick = { pinnedOnly = false }, label = { Text("All (${history.all.size})") }, colors = chipColors)
-                    FilterChip(selected = pinnedOnly, onClick = { pinnedOnly = true }, label = { Text("Pinned (${history.pinned.size})") },
-                        leadingIcon = { Icon(Icons.Default.PushPin, null, Modifier.size(16.dp)) }, colors = chipColors)
-                }
                 if (clips.isEmpty()) {
                     ClipboardMessage(if (pinnedOnly) "Pin a clip to keep it at the top."
                         else "Copy text in any app. Your saved clips will appear here.", Modifier.weight(1f))
                 } else {
-                    LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f).fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 3.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         items(clips, key = { it.id }) { item ->
                             ClipboardEntry(item, paste = { clipboard.pasteItem(item) },
                                 typeOut = { clipboard.typeOutItem(item) },
@@ -164,40 +161,44 @@ private fun ClipboardMessage(text: String, modifier: Modifier) {
 private fun ClipboardEntry(item: ClipboardItem, paste: () -> Unit, typeOut: () -> Unit,
     pin: () -> Unit, delete: () -> Unit) {
     val context = LocalContext.current
-    val colors = MaterialTheme.colorScheme
     var more by remember { mutableStateOf(false) }
-    Surface(shape = RoundedCornerShape(8.dp), color = colors.surfaceContainer) {
+    Surface(shape = RoundedCornerShape(4.dp), color = Color.White, contentColor = Color.Black) {
         Column {
-            if (item.type == ItemType.TEXT) {
-                Text(item.displayText(), Modifier.fillMaxWidth().clickable(onClick = paste)
-                    .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 6.dp),
-                    style = MaterialTheme.typography.bodyMedium, color = colors.onSurface,
-                    maxLines = 3, overflow = TextOverflow.Ellipsis)
-            } else {
-                val thumbnail = rememberMediaThumbnail(context, ContentUris.parseId(item.uri!!), item.type)
-                if (thumbnail?.isSuccess == true) Image(thumbnail.getOrThrow(), item.type.toString(),
-                    Modifier.fillMaxWidth().height(90.dp).clickable(onClick = paste), contentScale = ContentScale.Crop)
-                else Text(item.displayText(), Modifier.padding(14.dp), color = colors.onSurface)
-            }
-            Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = paste, colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurface)) {
-                    Text("Paste", color = colors.onSurface, fontWeight = FontWeight.SemiBold)
-                }
-                if (item.type == ItemType.TEXT) TextButton(onClick = typeOut, colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurface)) {
-                    Text("Type out", color = colors.onSurface)
-                }
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = pin) {
-                    Icon(if (item.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
-                        if (item.isPinned) "Unpin clip" else "Pin clip",
-                        tint = colors.onSurface)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                if (item.type == ItemType.TEXT) {
+                    Text(item.displayText(), Modifier.weight(1f).heightIn(min = 48.dp).clickable(onClick = paste)
+                        .padding(start = 8.dp, top = 12.dp, bottom = 6.dp),
+                        fontSize = 14.sp, color = Color.Black,
+                        maxLines = 4, overflow = TextOverflow.Ellipsis)
+                } else {
+                    val thumbnail = rememberMediaThumbnail(context, ContentUris.parseId(item.uri!!), item.type)
+                    if (thumbnail?.isSuccess == true) Image(thumbnail.getOrThrow(), item.type.toString(),
+                        Modifier.weight(1f).height(90.dp).clickable(onClick = paste), contentScale = ContentScale.Crop)
+                    else Text(item.displayText(), Modifier.weight(1f).padding(8.dp), color = Color.Black)
                 }
                 Box {
-                    IconButton(onClick = { more = true }) { Icon(Icons.Default.MoreVert, "Clip options") }
+                    IconButton(onClick = { more = true }, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.MoreVert, "Clip options", tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+                    }
                     DropdownMenu(expanded = more, onDismissRequest = { more = false }) {
                         DropdownMenuItem(text = { Text("Delete clip") }, onClick = { more = false; delete() },
                             leadingIcon = { Icon(Icons.Default.Delete, null) })
                     }
+                }
+            }
+            Row(Modifier.fillMaxWidth().height(40.dp).padding(start = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = paste, contentPadding = PaddingValues(horizontal = 5.dp),
+                    modifier = Modifier.weight(1f), colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)) {
+                    Text("Paste", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Medium, maxLines = 1)
+                }
+                if (item.type == ItemType.TEXT) TextButton(onClick = typeOut, contentPadding = PaddingValues(horizontal = 5.dp),
+                    modifier = Modifier.weight(1.3f), colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)) {
+                    Text("Type out", fontSize = 12.sp, color = Color.Black, maxLines = 1)
+                }
+                IconButton(onClick = pin, modifier = Modifier.size(40.dp)) {
+                    Icon(if (item.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                        if (item.isPinned) "Unpin clip" else "Pin clip",
+                        tint = Color.DarkGray, modifier = Modifier.size(19.dp))
                 }
             }
         }
