@@ -71,6 +71,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.ToggleOff
 import androidx.compose.material.icons.filled.ToggleOn
@@ -167,6 +168,7 @@ fun ClipboardInputLayout(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val clipboardManager by context.clipboardManager()
+    val isTypingOut by clipboardManager.isTypingOut.collectAsState()
     val keyboardManager by context.keyboardManager()
     val inputFeedbackController = LocalInputFeedbackController.current
     val androidKeyguardManager = remember { context.systemService(AndroidKeyguardManager::class) }
@@ -238,6 +240,17 @@ fun ClipboardInputLayout(
                 SnyggIcon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 )
+            }
+            if (isTypingOut) {
+                PanelHeaderButton(
+                    onClick = { clipboardManager.cancelTypeOut() },
+                    modifier = sizeModifier,
+                ) {
+                    SnyggIcon(
+                        imageVector = Icons.Default.Stop,
+                        contentDescription = stringRes(R.string.clip__stop_typing),
+                    )
+                }
             }
             // The tabs take the title's place rather than a row of their own (issue #395): the free width
             // beside the buttons was unused, and the panel's height is fixed, so a new row would only
@@ -568,6 +581,15 @@ fun ClipboardInputLayout(
                             ) {
                                 clipboardManager.pasteItem(popupItem!!)
                                 popupItem = null
+                            }
+                            if (popupItem!!.type == ItemType.TEXT) {
+                                PopupAction(
+                                    icon = Icons.Default.TextFields,
+                                    text = stringRes(R.string.clip__type_out_item),
+                                ) {
+                                    clipboardManager.typeOutItem(popupItem!!)
+                                    popupItem = null
+                                }
                             }
                         }
                     }

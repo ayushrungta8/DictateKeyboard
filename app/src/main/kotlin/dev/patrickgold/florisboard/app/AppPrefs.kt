@@ -142,7 +142,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         )
         val historyEnabled = boolean(
             key = "clipboard__history_enabled",
-            default = false,
+            default = true,
         )
         val historyNumGridColumnsPortrait = int(
             key = "clipboard__history_num_grid_columns_portrait",
@@ -185,7 +185,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         )
         val historySizeLimitEnabled = boolean(
             key = "clipboard__history_size_limit_enabled",
-            default = true,
+            default = false,
         )
         val historySizeLimit = int(
             key = "clipboard__history_size_limit",
@@ -201,7 +201,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         )
         val clearPrimaryClipAffectsHistoryIfUnpinned = boolean(
             key = "clipboard__clear_primary_clip_affects_history_if_unpinned",
-            default = true,
+            default = false,
         )
     }
 
@@ -313,7 +313,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // ("openai", "groq") or a "custom:<uuid>" endpoint. The actual key/model live in the keyring.
         val transcriptionProviderId = string(
             key = "dictate__transcription_provider_id",
-            default = "openai",
+            default = "local",
         )
 
         // On-device offline fallback (issue #104): when the active provider is a cloud one and its call
@@ -883,10 +883,10 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
             default = "",
         )
         // Comma-separated dictation language codes the user cycles through on the recording bar
-        // (see DictateLanguages; "detect" = auto-detect). Default mirrors the legacy app.
+        // (see DictateLanguages; "detect" = auto-detect). This fork starts with English and Hindi.
         val inputLanguages = string(
             key = "dictate__input_languages",
-            default = "detect,en",
+            default = "detect,en,hi",
         )
         // The currently active dictation language code; persists across sessions and is switched
         // from the recording bar's language chip.
@@ -946,10 +946,10 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
 
         // --- Rewording / GPT (roadmap section 4) -------------------------------------------------
         // Master switch for the rewording feature (prompt chips, auto-apply, live prompt). Default
-        // on, mirroring the legacy app.
+        // off in this fork so the initial offline setup never requests cloud cleanup.
         val rewordingEnabled = boolean(
             key = "dictate__rewording_enabled",
-            default = true,
+            default = false,
         )
         // The spoken command word (issue #139): a dictation opening with it runs as a live prompt
         // instead of being inserted. Blank (the default) switches the whole recognition off — there is

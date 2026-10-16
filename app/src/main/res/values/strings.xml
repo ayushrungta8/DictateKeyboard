@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">Dictate</string>
+    <string name="app_name">Ayush Keyboard</string>
 
     <string name="key__phone_pause" comment="Label for the Pause key in the telephone keyboard layout">Pause</string>
     <string name="key__phone_wait" comment="Label for the Wait key in the telephone keyboard layout">Wait</string>
@@ -2757,4 +2757,10 @@
     <string name="translate__missing" comment="{language} is one or more language names">{language} is not downloaded</string>
     <string name="translate__failed">Translation failed</string>
     <string name="translate__unsupported">Translation is not available on this device</string>
+    <string name="clip__type_out_item">Type it out</string>
+    <string name="clip__stop_typing">Stop typing</string>
+    <string name="clip__type_out_failed">Stopped: this field did not accept more text. Some text may already be entered.</string>
+    <string name="personal__offline_title">Offline English + Hindi</string>
+    <string name="personal__offline_description">Download a multilingual model once. Your dictation audio stays on this phone. Mixed English/Hindi accuracy depends on the model; try it before relying on it.</string>
+    <string name="personal__offline_setup">Set up offline dictation</string>
 </resources>

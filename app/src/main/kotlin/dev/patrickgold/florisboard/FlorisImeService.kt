@@ -381,6 +381,8 @@ class FlorisImeService : LifecycleInputMethodService() {
     }
 
     override fun onStartInput(info: EditorInfo?, restarting: Boolean) {
+        val clipboardManager by clipboardManager()
+        clipboardManager.cancelTypeOut()
         flogInfo { "restarting=$restarting info=${info?.debugSummarize()}" }
         super.onStartInput(info, restarting)
         if (info == null) return
@@ -389,6 +391,8 @@ class FlorisImeService : LifecycleInputMethodService() {
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        val clipboardManager by clipboardManager()
+        clipboardManager.cancelTypeOut()
         flogInfo { "restarting=$restarting info=${info?.debugSummarize()}" }
         super.onStartInputView(info, restarting)
         if (info == null) return
@@ -522,12 +526,16 @@ class FlorisImeService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
+        val clipboardManager by clipboardManager()
+        clipboardManager.cancelTypeOut()
         flogInfo { "finishing=$finishingInput" }
         super.onFinishInputView(finishingInput)
         editorInstance.handleFinishInputView()
     }
 
     override fun onFinishInput() {
+        val clipboardManager by clipboardManager()
+        clipboardManager.cancelTypeOut()
         flogInfo { "(no args)" }
         super.onFinishInput()
         editorInstance.handleFinishInput()
@@ -553,6 +561,8 @@ class FlorisImeService : LifecycleInputMethodService() {
     }
 
     override fun onWindowHidden() {
+        val clipboardManager by clipboardManager()
+        clipboardManager.cancelTypeOut()
         super.onWindowHidden()
         // Collapsing the keyboard during a recording finalizes and keeps the audio so far (instead of
         // discarding it): the next keyboard open then offers to send the interrupted recording. Outside

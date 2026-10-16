@@ -829,6 +829,14 @@ private fun FlorisStepLayoutScope.ProviderChoice(
     onChooseServer: () -> Unit,
     onSkip: () -> Unit,
 ) {
+    ChoiceCard(
+        title = stringRes(R.string.personal__offline_title),
+        body = stringRes(R.string.personal__offline_description),
+        buttonLabel = stringRes(R.string.personal__offline_setup),
+        onClick = onChooseOnDevice,
+        marks = listOf(ProviderRegistry.LOCAL.id),
+    )
+    Spacer(modifier = Modifier.height(16.dp))
     StepText(stringRes(R.string.setup__provider__choose_intro))
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -948,7 +956,7 @@ private fun FlorisStepLayoutScope.OnDeviceChoice(
 ) {
     val context = LocalContext.current
     val prefs by FlorisPreferenceStore
-    val picks = remember { LocalModelCatalog.onboardingPicks(deviceLanguage(context)) }
+    val picks = remember { listOf(LocalModelCatalog.WHISPER_SMALL, LocalModelCatalog.WHISPER_BASE) }
     val downloads by LocalModelDownloads.state.collectAsState()
     val installedTick by LocalModelDownloads.installedTick.collectAsState()
     // Only the two on offer, not the whole catalog: this runs during composition.
