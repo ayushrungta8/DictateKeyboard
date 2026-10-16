@@ -158,8 +158,8 @@ private fun computeLanguageDisplayName(locale: FlorisLocale, displayLanguageName
         return cachedDisplayName
     }
     val displayName = when (displayLanguageNamesIn) {
-        DisplayLanguageNamesIn.SYSTEM_LOCALE -> locale.displayName()
-        DisplayLanguageNamesIn.NATIVE_LOCALE -> locale.displayName(locale)
+        DisplayLanguageNamesIn.SYSTEM_LOCALE -> locale.displayLanguage()
+        DisplayLanguageNamesIn.NATIVE_LOCALE -> locale.displayLanguage(locale)
     }
     cachedDisplayNameState = Triple(locale, displayLanguageNamesIn, displayName)
     return displayName

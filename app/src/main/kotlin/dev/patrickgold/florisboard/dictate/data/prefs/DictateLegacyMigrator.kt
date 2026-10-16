@@ -13,6 +13,8 @@ package dev.patrickgold.florisboard.dictate.data.prefs
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import dev.patrickgold.florisboard.app.FlorisPreferenceStore
+import dev.patrickgold.florisboard.dictate.DictateLegacyLayout
+import dev.patrickgold.florisboard.ime.theme.extCoreTheme
 import dev.patrickgold.florisboard.dictate.DictateLanguages
 import dev.patrickgold.florisboard.dictate.DictatePromptsLayout
 import dev.patrickgold.florisboard.dictate.provider.DictateProxyType
@@ -50,6 +52,17 @@ object DictateLegacyMigrator {
         prefs.dictate.personalHinglishMigrated.set(true)
     }
 
+
+    /** Apply the requested compact keyboard UI once, preserving later theme customization. */
+    suspend fun migratePersonalUiIfNeeded() {
+        val prefs by FlorisPreferenceStore
+        if (prefs.dictate.personalUiMigrated.get()) return
+        prefs.theme.dayThemeId.set(extCoreTheme("personal_light"))
+        prefs.theme.nightThemeId.set(extCoreTheme("personal_dark"))
+        prefs.theme.accentColor.set(Color(0xFF616B90))
+        prefs.dictate.legacyLayout.set(DictateLegacyLayout.OFF)
+        prefs.dictate.personalUiMigrated.set(true)
+    }
 
     @Suppress("DEPRECATION") // writes the deprecated flat prefs that migrateProviderKeyringIfNeeded folds in
     suspend fun migrateIfNeeded(context: Context) {

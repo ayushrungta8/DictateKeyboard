@@ -78,8 +78,7 @@ fun TextInputLayout(
             .wrapContentHeight(),
     ) {
         // While one of the keyboard's own fields is open — a search (issues #110, #274, #317, #333) or the
-        // translate bar (#424) — it sits on top, where the rewording prompt row otherwise is, and the
-        // Smartbar stays below it, as in Gboard: its strip then suggests words for the field being typed
+        // translate bar (#424) — it sits above the permanent toolbar. Its strip suggests words for the field being typed
         // in, and its mic dictates into it. The keys below type into the field. Each field sizes itself,
         // so the keyboard grows for as long as it is open. Only one is ever open: every one of them, and
         // every panel opener, closes the rest first.
@@ -95,7 +94,7 @@ fun TextInputLayout(
             }
         }
         // Called in the same place whether a field is open or not, so opening one does not rebuild it.
-        Smartbar(showPromptRow = !fieldOpen)
+        Smartbar()
         // The recent-emoji row (#340) sits between the Smartbar and the keys, exactly where a number row
         // would. Not while a field is open — its taps are character keys and would land in the field,
         // and the field has already made the keyboard taller — and not over the actions overflow, which

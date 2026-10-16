@@ -905,6 +905,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // Guard so the one-time seeding of the device/system dictation language (added on top of the
         // default detect,en) runs only once on a fresh install. See
         // DictateLegacyMigrator.seedDeviceLanguageIfNeeded.
+        val personalUiMigrated = boolean(key = "dictate__personal_ui_migrated", default = false)
         val personalHinglishMigrated = boolean(
             key = "dictate__personal_hinglish_migrated",
             default = false,
@@ -1631,7 +1632,7 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         )
         val accentColor = custom(
             key = "other__accent_color",
-            default = Color(0xFF30B7E6), // Dictate light blue
+            default = Color(0xFF616B90), // Muted keyboard accent
             serializer = ColorPreferenceSerializer,
         )
         val settingsLanguage = string(
@@ -1827,17 +1828,17 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         )
         val dayThemeId = custom(
             key = "theme__day_theme_id",
-            default = extCoreTheme("floris_day"),
+            default = extCoreTheme("personal_light"),
             serializer = ExtensionComponentName.Serializer,
         )
         val nightThemeId = custom(
             key = "theme__night_theme_id",
-            default = extCoreTheme("floris_night"),
+            default = extCoreTheme("personal_dark"),
             serializer = ExtensionComponentName.Serializer,
         )
         val accentColor = custom(
             key = "theme__accent_color",
-            default = Color(0xFF30B7E6), // Dictate light blue
+            default = Color(0xFF616B90), // Muted keyboard accent
             serializer = ColorPreferenceSerializer,
         )
         // What the high-contrast switch (#387) replaced, so turning it off puts the user's own themes
@@ -1846,12 +1847,12 @@ abstract class FlorisPreferenceModel : PreferenceModel() {
         // the keyboard someone is looking at.
         val themeIdBeforeHighContrastDay = custom(
             key = "theme__day_theme_id_before_high_contrast",
-            default = extCoreTheme("floris_day"),
+            default = extCoreTheme("personal_light"),
             serializer = ExtensionComponentName.Serializer,
         )
         val themeIdBeforeHighContrastNight = custom(
             key = "theme__night_theme_id_before_high_contrast",
-            default = extCoreTheme("floris_night"),
+            default = extCoreTheme("personal_dark"),
             serializer = ExtensionComponentName.Serializer,
         )
         val sunriseTime = localTime(
